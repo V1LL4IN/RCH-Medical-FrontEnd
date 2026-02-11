@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  User              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Admin {
+  id        String   @id
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Doctor {
+  id              String       @id
+  name            String
+  email           String       @unique
+  phone           String?
+  experienceYears Int
+  rating          Float        @default(5)
+  specialtyId     String
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime
+  userId          String?      @unique
+  status          DoctorStatus @default(Activo)
+  Specialty       Specialty    @relation(fields: [specialtyId], references: [id])
+  User            User?        @relation(fields: [userId], references: [id])
+}
+
+model Session {
+  id           String   @id
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Specialty {
+  id          String   @id
+  name        String   @unique
+  description String
+  imageUrl    String?
+  doctorCount Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+  Doctor      Doctor[]
+}
+
+model User {
+  id            String     @id
+  name          String?
+  email         String?    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime
+  status        UserStatus @default(Activo)
+  Account       Account[]
+  Admin         Admin?
+  Doctor        Doctor?
+  Session       Session[]
+}
+
+enum DoctorStatus {
+  Activo
+  Inactivo
+  DeVacaciones
+}
+
+enum UserStatus {
+  Activo
+  Inactivo
+  Suspendido
+}
