@@ -74,18 +74,18 @@ export default function ServiciosPage() {
                   <Link
                     key={service.title}
                     href={service.href}
-                    className="group h-full p-6 rounded-xl border border-border bg-card hover:border-accent hover:shadow-lg transition-all duration-300"
+                    className="group h-full p-6 rounded-xl border border-border bg-card hover:border-primary hover:shadow-lg transition-all duration-300"
                   >
                     <div className={`flex items-center justify-center w-14 h-14 rounded-lg ${service.color} mb-5`}>
                       <Icon className="w-7 h-7" />
                     </div>
-                    <h3 className="font-bold text-xl text-foreground mb-2 group-hover:text-accent transition-colors">
+                    <h3 className="font-bold text-xl text-foreground mb-2 group-hover:text-primary transition-colors">
                       {service.title}
                     </h3>
                     <p className="text-muted-foreground text-sm mb-4">{service.description}</p>
                     <div className="flex items-center justify-between mt-auto pt-4 border-t border-border">
                       <span className="text-sm font-semibold text-accent">{service.discount}</span>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
+                      <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                     </div>
                   </Link>
                 )

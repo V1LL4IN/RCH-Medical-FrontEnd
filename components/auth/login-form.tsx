@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import { signIn, getSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Eye, EyeOff, AlertCircle, Info } from "lucide-react"
+import { Eye, EyeOff, AlertCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
 
@@ -104,11 +104,6 @@ export function LoginForm() {
     }
   }
 
-  const fillDemoCredentials = (email: string, password: string) => {
-    setFormData({ email, password })
-    setError("")
-  }
-
   return (
     <div className="w-full max-w-md">
       <div className="bg-card border border-border rounded-2xl p-8 space-y-6">
@@ -119,52 +114,6 @@ export function LoginForm() {
           </div>
           <h1 className="text-3xl font-bold text-foreground">Red Cedco Health</h1>
           <p className="text-muted-foreground">Inicia sesión en tu cuenta</p>
-        </div>
-
-        <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-          <div className="flex items-start gap-2 mb-3">
-            <Info className="w-4 h-4 text-primary mt-0.5" />
-            <span className="text-sm font-medium text-foreground">Credenciales de demostración</span>
-          </div>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <button
-              type="button"
-              onClick={() => fillDemoCredentials("paciente@demo.com", "demo123")}
-              className="text-left p-2 rounded bg-background hover:bg-muted transition"
-            >
-              <span className="font-semibold text-primary">Paciente</span>
-              <br />
-              paciente@demo.com
-            </button>
-            <button
-              type="button"
-              onClick={() => fillDemoCredentials("doctor@demo.com", "demo123")}
-              className="text-left p-2 rounded bg-background hover:bg-muted transition"
-            >
-              <span className="font-semibold text-primary">Doctor</span>
-              <br />
-              doctor@demo.com
-            </button>
-            <button
-              type="button"
-              onClick={() => fillDemoCredentials("aliado@demo.com", "demo123")}
-              className="text-left p-2 rounded bg-background hover:bg-muted transition"
-            >
-              <span className="font-semibold text-primary">Aliado</span>
-              <br />
-              aliado@demo.com
-            </button>
-            <button
-              type="button"
-              onClick={() => fillDemoCredentials("admin@demo.com", "demo123")}
-              className="text-left p-2 rounded bg-background hover:bg-muted transition"
-            >
-              <span className="font-semibold text-primary">Admin</span>
-              <br />
-              admin@demo.com
-            </button>
-          </div>
-          <p className="text-[10px] text-muted-foreground mt-2">Contraseña: demo123</p>
         </div>
 
         {/* Error message */}

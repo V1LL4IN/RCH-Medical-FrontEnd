@@ -207,7 +207,7 @@ export function SettingsPage() {
 
               <div className="p-4 bg-secondary rounded-lg">
                 <h4 className="font-semibold text-foreground mb-3">Sesiones Activas</h4>
-                <p className="text-sm text-muted-foreground mb-4">Tienes 2 sesiones activas</p>
+                <p className="text-sm text-muted-foreground mb-4">Gestiona tus sesiones activas</p>
                 <Button variant="outline" className="border-border bg-transparent">
                   Cerrar Todas las Sesiones
                 </Button>
@@ -227,40 +227,23 @@ export function SettingsPage() {
             <div className="space-y-4">
               <div className="p-4 border border-border rounded-lg">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold text-foreground">Versión del Sistema</span>
-                  <span className="text-sm text-muted-foreground">v2.1.0</span>
-                </div>
-              </div>
-
-              <div className="p-4 border border-border rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold text-foreground">Última Actualización</span>
-                  <span className="text-sm text-muted-foreground">2025-01-10</span>
+                  <span className="font-semibold text-foreground">Plataforma</span>
+                  <span className="text-sm text-muted-foreground">RCH Medical Frontend</span>
                 </div>
               </div>
 
               <div className="p-4 border border-border rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-semibold text-foreground">Base de Datos</span>
-                  <span className="text-sm text-muted-foreground">PostgreSQL 14</span>
+                  <span className="text-sm text-muted-foreground">PostgreSQL</span>
                 </div>
               </div>
 
               <div className="p-4 border border-border rounded-lg">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="font-semibold text-foreground">Espacio Utilizado</span>
-                  <span className="text-sm text-muted-foreground">2.4 GB de 5 GB</span>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold text-foreground">Backend</span>
+                  <span className="text-sm text-muted-foreground">NestJS (Railway)</span>
                 </div>
-                <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
-                  <div className="h-full w-1/2 bg-primary"></div>
-                </div>
-              </div>
-
-              <div className="pt-6 border-t border-border space-y-2">
-                <Button className="w-full bg-primary hover:bg-primary/90">Respaldar Base de Datos</Button>
-                <Button variant="outline" className="w-full border-border bg-transparent">
-                  Limpiar Caché
-                </Button>
               </div>
             </div>
           </Card>

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Lock } from "lucide-react"
+
 import Image from "next/image"
 
 export function Header() {
@@ -19,39 +19,29 @@ export function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-sm text-muted-foreground hover:text-accent transition">
+            <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition">
               Inicio
             </Link>
-            <Link href="/servicios" className="text-sm text-muted-foreground hover:text-accent transition">
+            <Link href="/servicios" className="text-sm text-muted-foreground hover:text-primary transition">
               Servicios
             </Link>
-            <Link href="/especialidades" className="text-sm text-muted-foreground hover:text-accent transition">
+            <Link href="/especialidades" className="text-sm text-muted-foreground hover:text-primary transition">
               Especialidades
             </Link>
-            <Link href="/medicos" className="text-sm text-muted-foreground hover:text-accent transition">
+            <Link href="/medicos" className="text-sm text-muted-foreground hover:text-primary transition">
               Médicos
             </Link>
-            <Link href="/membresias" className="text-sm text-muted-foreground hover:text-accent transition">
+            <Link href="/membresias" className="text-sm text-muted-foreground hover:text-primary transition">
               Membresías
             </Link>
-            <Link href="/promociones" className="text-sm text-muted-foreground hover:text-accent transition">
+            <Link href="/promociones" className="text-sm text-muted-foreground hover:text-primary transition">
               Promociones
             </Link>
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link href="/admin/login">
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 bg-transparent hover:border-accent hover:text-accent"
-              >
-                <Lock className="w-4 h-4" />
-                <span className="hidden sm:inline">Admin</span>
-              </Button>
-            </Link>
             <Link href="/login">
-              <Button variant="outline" size="sm" className="hover:border-accent hover:text-accent bg-transparent">
+              <Button variant="outline" size="sm" className="bg-transparent">
                 Iniciar Sesión
               </Button>
             </Link>

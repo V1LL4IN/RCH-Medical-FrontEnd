@@ -1,6 +1,16 @@
+"use client"
+
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 
 export function Footer() {
+  const { data: session } = useSession()
+
+  // Don't show footer when user is logged in
+  if (session?.user) {
+    return null
+  }
+
   return (
     <footer className="w-full border-t border-border bg-secondary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

@@ -273,6 +273,7 @@ export interface ApiUser {
   name?: string
   email: string
   status: UserStatus
+  image?: string
   createdAt?: string
   updatedAt?: string
   admin?: {

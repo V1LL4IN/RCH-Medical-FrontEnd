@@ -6,11 +6,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Loader2 } from "lucide-react"
+import { ImageUpload } from "@/components/ui/image-upload"
 import type { ApiSpecialty, CreateSpecialtyDto, UpdateSpecialtyDto } from "@/lib/types"
 
 interface SpecialtyFormProps {
   specialty: ApiSpecialty | null
-  onSubmit: (data: CreateSpecialtyDto | UpdateSpecialtyDto) => void
+  onSubmit: (data: FormData) => void
   onClose: () => void
   submitting?: boolean
 }
@@ -19,8 +20,11 @@ export function SpecialtyForm({ specialty, onSubmit, onClose, submitting = false
   const [formData, setFormData] = useState({
     name: specialty?.name || "",
     description: specialty?.description || "",
-    imageUrl: specialty?.imageUrl || "",
+    image: null as File | null,
   })
+
+  // Keep track of original image URL for the preview
+  const initialImageUrl = specialty?.imageUrl || null
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -33,11 +37,19 @@ export function SpecialtyForm({ specialty, onSubmit, onClose, submitting = false
       alert("Por favor completa todos los campos requeridos")
       return
     }
-    onSubmit({
-      name: formData.name,
-      description: formData.description,
-      imageUrl: formData.imageUrl || undefined,
-    })
+
+    const data = new FormData()
+    data.append("name", formData.name)
+    data.append("description", formData.description)
+    if (formData.image) {
+      data.append("image", formData.image)
+    }
+
+    // If we're updating and didn't change the image, we don't need to send it
+    // But if we're creating, we might send it if it exists. 
+    // The API handles optional image.
+
+    onSubmit(data)
   }
 
   return (
@@ -74,21 +86,15 @@ export function SpecialtyForm({ specialty, onSubmit, onClose, submitting = false
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="imageUrl" className="text-foreground">
-          URL de Imagen
-        </Label>
-        <Input
-          id="imageUrl"
-          name="imageUrl"
-          value={formData.imageUrl}
-          onChange={handleChange}
-          placeholder="https://example.com/imagen.jpg o /imagen-local.jpg"
-          className="border-border bg-secondary"
-          disabled={submitting}
-        />
-        <p className="text-xs text-muted-foreground">
-          Puede ser una URL externa o una ruta local (ej: /cardiologia.jpg)
-        </p>
+        <Label className="text-foreground">Imagen de la Especialidad</Label>
+        <div className="flex justify-center p-4 border rounded-lg border-border bg-secondary/30">
+          <ImageUpload
+            value={initialImageUrl}
+            onChange={(file) => setFormData((prev) => ({ ...prev, image: file }))}
+            onRemove={() => setFormData((prev) => ({ ...prev, image: null }))}
+            disabled={submitting}
+          />
+        </div>
       </div>
 
       <div className="flex gap-3 justify-end pt-4 border-t border-border">

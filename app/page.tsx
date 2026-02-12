@@ -13,8 +13,8 @@ export default function Home() {
       <AuthHeader />
       <div className="flex-1">
         <Hero />
-        <Services />
         <Specialties />
+        <Services />
         <Promotion />
       </div>
       <Footer />

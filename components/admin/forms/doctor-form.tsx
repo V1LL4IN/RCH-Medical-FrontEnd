@@ -6,17 +6,19 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Loader2 } from "lucide-react"
+import { ImageUpload } from "@/components/ui/image-upload"
 import type { ApiDoctor, ApiSpecialty, CreateDoctorDto, UpdateDoctorDto, DoctorStatus } from "@/lib/types"
 
 interface DoctorFormProps {
   doctor: ApiDoctor | null
   specialties: ApiSpecialty[]
-  onSubmit: (data: CreateDoctorDto | UpdateDoctorDto) => void
+  initialImage?: string | null
+  onSubmit: (data: (CreateDoctorDto | UpdateDoctorDto) & { image?: File | null }) => void
   onClose: () => void
   submitting?: boolean
 }
 
-export function DoctorForm({ doctor, specialties, onSubmit, onClose, submitting = false }: DoctorFormProps) {
+export function DoctorForm({ doctor, specialties, initialImage, onSubmit, onClose, submitting = false }: DoctorFormProps) {
   const [formData, setFormData] = useState({
     name: doctor?.name || "",
     email: doctor?.email || "",
@@ -24,6 +26,7 @@ export function DoctorForm({ doctor, specialties, onSubmit, onClose, submitting 
     experienceYears: doctor?.experienceYears?.toString() || "",
     specialtyId: doctor?.specialty?.id || "",
     status: doctor?.status || "Activo" as DoctorStatus,
+    image: null as File | null,
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,13 +45,14 @@ export function DoctorForm({ doctor, specialties, onSubmit, onClose, submitting 
       return
     }
 
-    const data: CreateDoctorDto | UpdateDoctorDto = {
+    const data: (CreateDoctorDto | UpdateDoctorDto) & { image?: File | null } = {
       name: formData.name,
       email: formData.email,
       phone: formData.phone || undefined,
       experienceYears: parseInt(formData.experienceYears) || 0,
       specialtyId: formData.specialtyId,
       status: formData.status as DoctorStatus,
+      image: formData.image,
     }
 
     onSubmit(data)
@@ -57,6 +61,21 @@ export function DoctorForm({ doctor, specialties, onSubmit, onClose, submitting 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Image Upload Column */}
+        <div className="md:col-span-2 flex justify-center pb-4">
+          <div className="space-y-2 text-center">
+            <Label className="text-foreground">Foto de Perfil</Label>
+            <div className="flex justify-center p-4 border rounded-lg border-border bg-secondary/30">
+              <ImageUpload
+                value={initialImage || null}
+                onChange={(file) => setFormData((prev) => ({ ...prev, image: file }))}
+                onRemove={() => setFormData((prev) => ({ ...prev, image: null }))}
+                disabled={submitting}
+              />
+            </div>
+          </div>
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="name" className="text-foreground">
             Nombre Completo *

@@ -172,12 +172,6 @@ export function DoctorsPage() {
                   </div>
                 </div>
 
-                {/* Contact */}
-                <div className="text-sm text-muted-foreground mb-4">
-                  <p>{doctor.email}</p>
-                  {doctor.phone && <p>{doctor.phone}</p>}
-                </div>
-
                 {/* CTA */}
                 <div className="flex-1"></div>
                 <div className="pt-4 border-t border-border">

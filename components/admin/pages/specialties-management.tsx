@@ -44,7 +44,7 @@ export function SpecialtiesManagement() {
       specialty.description?.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
-  const handleAddSpecialty = async (specialtyData: CreateSpecialtyDto) => {
+  const handleAddSpecialty = async (specialtyData: CreateSpecialtyDto | FormData) => {
     try {
       setSubmitting(true)
       const newSpecialty = await browserApiClient.createSpecialty(specialtyData)
@@ -57,7 +57,7 @@ export function SpecialtiesManagement() {
     }
   }
 
-  const handleEditSpecialty = async (specialtyData: UpdateSpecialtyDto) => {
+  const handleEditSpecialty = async (specialtyData: UpdateSpecialtyDto | FormData) => {
     if (!editingSpecialty) return
     try {
       setSubmitting(true)

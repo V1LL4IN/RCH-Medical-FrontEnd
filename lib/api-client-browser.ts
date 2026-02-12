@@ -37,12 +37,18 @@ class BrowserApiClient {
     private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
         const token = await this.getAuthToken()
 
+        const headers: HeadersInit = {
+            ...(token && { Authorization: `Bearer ${token}` }),
+            ...options?.headers,
+        }
+
+        // Only set Content-Type to application/json if body is NOT FormData
+        if (!(options?.body instanceof FormData)) {
+            Object.assign(headers, { "Content-Type": "application/json" })
+        }
+
         const response = await fetch(`${this.baseUrl}${endpoint}`, {
-            headers: {
-                "Content-Type": "application/json",
-                ...(token && { Authorization: `Bearer ${token}` }),
-                ...options?.headers,
-            },
+            headers,
             ...options,
         })
 
@@ -71,17 +77,17 @@ class BrowserApiClient {
         return this.request<ApiSpecialty>(`/specialties/${id}`)
     }
 
-    async createSpecialty(data: CreateSpecialtyDto): Promise<ApiSpecialty> {
+    async createSpecialty(data: CreateSpecialtyDto | FormData): Promise<ApiSpecialty> {
         return this.request<ApiSpecialty>("/specialties", {
             method: "POST",
-            body: JSON.stringify(data),
+            body: data instanceof FormData ? data : JSON.stringify(data),
         })
     }
 
-    async updateSpecialty(id: string, data: UpdateSpecialtyDto): Promise<ApiSpecialty> {
+    async updateSpecialty(id: string, data: UpdateSpecialtyDto | FormData): Promise<ApiSpecialty> {
         return this.request<ApiSpecialty>(`/specialties/${id}`, {
             method: "PATCH",
-            body: JSON.stringify(data),
+            body: data instanceof FormData ? data : JSON.stringify(data),
         })
     }
 
@@ -135,17 +141,17 @@ class BrowserApiClient {
         return this.request<ApiUser>(`/users/${id}`)
     }
 
-    async createUser(data: CreateUserDto): Promise<ApiUser> {
+    async createUser(data: CreateUserDto | FormData): Promise<ApiUser> {
         return this.request<ApiUser>("/users", {
             method: "POST",
-            body: JSON.stringify(data),
+            body: data instanceof FormData ? data : JSON.stringify(data),
         })
     }
 
-    async updateUser(id: string, data: UpdateUserDto): Promise<ApiUser> {
+    async updateUser(id: string, data: UpdateUserDto | FormData): Promise<ApiUser> {
         return this.request<ApiUser>(`/users/${id}`, {
             method: "PATCH",
-            body: JSON.stringify(data),
+            body: data instanceof FormData ? data : JSON.stringify(data),
         })
     }
 

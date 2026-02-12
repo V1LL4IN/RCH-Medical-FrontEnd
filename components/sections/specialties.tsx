@@ -1,58 +1,23 @@
-import Link from "next/link"
-import { ChevronRight } from "lucide-react"
+"use client"
 
-const specialties = [
-  {
-    id: 1,
-    name: "Medicina General",
-    doctors: 45,
-    icon: "🏥",
-  },
-  {
-    id: 2,
-    name: "Ginecología",
-    doctors: 28,
-    icon: "👩‍⚕️",
-  },
-  {
-    id: 3,
-    name: "Endocrinología",
-    doctors: 15,
-    icon: "💊",
-  },
-  {
-    id: 4,
-    name: "Psicología",
-    doctors: 32,
-    icon: "🧠",
-  },
-  {
-    id: 5,
-    name: "Cardiología",
-    doctors: 22,
-    icon: "❤️",
-  },
-  {
-    id: 6,
-    name: "Odontología",
-    doctors: 38,
-    icon: "🦷",
-  },
-  {
-    id: 7,
-    name: "Traumatología",
-    doctors: 19,
-    icon: "🦴",
-  },
-  {
-    id: 8,
-    name: "Medicina Física",
-    doctors: 12,
-    icon: "🏃",
-  },
-]
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import { ChevronRight, Stethoscope } from "lucide-react"
+import { browserApiClient } from "@/lib/api-client-browser"
+import type { ApiSpecialty } from "@/lib/types"
 
 export function Specialties() {
+  const [specialties, setSpecialties] = useState<ApiSpecialty[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    browserApiClient
+      .getSpecialties()
+      .then((data) => setSpecialties(data))
+      .catch(() => setSpecialties([]))
+      .finally(() => setLoading(false))
+  }, [])
+
   return (
     <section className="w-full py-20 md:py-28 bg-secondary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -70,17 +35,43 @@ export function Specialties() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {specialties.map((specialty) => (
-            <Link key={specialty.id} href={`/especialidades/${specialty.id}`}>
-              <div className="group p-6 rounded-xl bg-card border border-border hover:border-primary hover:shadow-lg hover:translate-y-[-4px] transition-all duration-300 cursor-pointer">
-                <div className="text-4xl mb-4">{specialty.icon}</div>
-                <h3 className="font-semibold text-lg text-foreground mb-1">{specialty.name}</h3>
-                <p className="text-sm text-muted-foreground">{specialty.doctors} especialistas</p>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="p-6 rounded-xl bg-card border border-border animate-pulse">
+                <div className="w-10 h-10 rounded-full bg-muted mb-4" />
+                <div className="h-5 w-2/3 bg-muted rounded mb-2" />
+                <div className="h-4 w-1/3 bg-muted rounded" />
               </div>
-            </Link>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : specialties.length === 0 ? (
+          <p className="text-center text-muted-foreground py-12">No hay especialidades disponibles por el momento.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {specialties.slice(0, 8).map((specialty) => (
+              <Link key={specialty.id} href={`/medicos?especialidad=${encodeURIComponent(specialty.name)}`}>
+                <div className="group p-6 rounded-xl bg-card border border-border hover:border-primary hover:shadow-lg hover:translate-y-[-4px] transition-all duration-300 cursor-pointer">
+                  {specialty.imageUrl ? (
+                    <img
+                      src={specialty.imageUrl}
+                      alt={specialty.name}
+                      className="w-10 h-10 rounded-full object-cover mb-4"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                      <Stethoscope className="w-5 h-5 text-primary" />
+                    </div>
+                  )}
+                  <h3 className="font-semibold text-lg text-foreground mb-1">{specialty.name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {specialty._count?.doctors ?? 0} especialistas
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )

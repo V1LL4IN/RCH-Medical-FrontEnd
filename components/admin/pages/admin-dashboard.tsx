@@ -1,99 +1,72 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import {
-  LineChart,
-  Line,
   PieChart,
   Pie,
   Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts"
 import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Users, Stethoscope, Calendar, CreditCard, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { Users, Stethoscope, Zap, Loader2 } from "lucide-react"
+import { browserApiClient } from "@/lib/api-client-browser"
+import type { ApiDoctor, ApiUser, ApiSpecialty } from "@/lib/types"
 
-const dashboardStats = [
-  {
-    label: "Total Pacientes",
-    value: "1,245",
-    change: "+12%",
-    icon: Users,
-    color: "primary",
-  },
-  {
-    label: "Total Doctores",
-    value: "48",
-    change: "+3",
-    icon: Stethoscope,
-    color: "primary",
-  },
-  {
-    label: "Citas Este Mes",
-    value: "342",
-    change: "+8%",
-    icon: Calendar,
-    color: "primary",
-  },
-  {
-    label: "Ingresos",
-    value: "$24,580",
-    change: "+15%",
-    icon: CreditCard,
-    color: "primary",
-  },
-]
-
-const appointmentsData = [
-  { mes: "Ene", citas: 240, completadas: 221 },
-  { mes: "Feb", citas: 380, completadas: 352 },
-  { mes: "Mar", citas: 200, completadas: 185 },
-  { mes: "Abr", citas: 278, completadas: 264 },
-  { mes: "May", citas: 189, completadas: 175 },
-  { mes: "Jun", citas: 239, completadas: 223 },
-]
-
-const specialtiesData = [
-  { name: "Cardiología", value: 35 },
-  { name: "Ginecología", value: 28 },
-  { name: "Medicina General", value: 22 },
-  { name: "Odontología", value: 15 },
-]
-
-const COLORS = ["#2a5ba7", "#f59e0b", "#10b981", "#ef4444"]
-
-const recentAppointments = [
-  {
-    id: 1,
-    patient: "Juan Pérez García",
-    doctor: "Dr. Carlos García",
-    date: "2025-01-15",
-    time: "2:30 PM",
-    status: "completed",
-  },
-  {
-    id: 2,
-    patient: "María López Rodríguez",
-    doctor: "Dra. María Rodríguez",
-    date: "2025-01-14",
-    time: "10:00 AM",
-    status: "completed",
-  },
-  {
-    id: 3,
-    patient: "Pedro Sánchez Martinez",
-    doctor: "Dr. Roberto López",
-    date: "2025-01-13",
-    time: "3:45 PM",
-    status: "completed",
-  },
-]
+const COLORS = ["#2a5ba7", "#f59e0b", "#10b981", "#ef4444", "#8b5cf6", "#06b6d4", "#ec4899", "#84cc16"]
 
 export function AdminDashboard() {
+  const [doctors, setDoctors] = useState<ApiDoctor[]>([])
+  const [users, setUsers] = useState<ApiUser[]>([])
+  const [specialties, setSpecialties] = useState<ApiSpecialty[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [d, u, s] = await Promise.all([
+          browserApiClient.getDoctors(),
+          browserApiClient.getUsers(),
+          browserApiClient.getSpecialties(),
+        ])
+        setDoctors(d)
+        setUsers(u)
+        setSpecialties(s)
+      } catch {
+        // silently fail
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadData()
+  }, [])
+
+  const totalPatients = users.filter((u) => u.doctor === null && u.admin === null).length
+  const totalDoctors = doctors.length
+  const totalSpecialties = specialties.length
+  const totalUsers = users.length
+
+  const specialtiesData = specialties.map((s) => ({
+    name: s.name,
+    value: s._count?.doctors ?? 0,
+  })).filter((s) => s.value > 0)
+
+  const activeDoctors = doctors.filter((d) => d.status === "Activo")
+  const avgRating = doctors.length > 0
+    ? (doctors.reduce((sum, d) => sum + d.rating, 0) / doctors.length).toFixed(1)
+    : "0"
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Cargando dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="p-8 space-y-8 bg-background">
       {/* Header */}
@@ -104,129 +77,193 @@ export function AdminDashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {dashboardStats.map((stat) => {
-          const Icon = stat.icon
-          const isPositive = stat.change.startsWith("+")
-          return (
-            <Card key={stat.label} className="p-6 border border-border">
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Icon className="w-6 h-6 text-primary" />
-                </div>
-                <div className={`flex items-center gap-1 text-sm ${isPositive ? "text-green-600" : "text-red-600"}`}>
-                  {isPositive ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                  {stat.change}
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-            </Card>
-          )
-        })}
+        <Card className="p-6 border border-border">
+          <div className="flex items-start justify-between mb-4">
+            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Users className="w-6 h-6 text-primary" />
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground mb-1">Total Usuarios</p>
+          <p className="text-2xl font-bold text-foreground">{totalUsers}</p>
+          <p className="text-xs text-muted-foreground mt-1">{totalPatients} pacientes</p>
+        </Card>
+
+        <Card className="p-6 border border-border">
+          <div className="flex items-start justify-between mb-4">
+            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Stethoscope className="w-6 h-6 text-primary" />
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground mb-1">Total Doctores</p>
+          <p className="text-2xl font-bold text-foreground">{totalDoctors}</p>
+          <p className="text-xs text-muted-foreground mt-1">{activeDoctors.length} activos</p>
+        </Card>
+
+        <Card className="p-6 border border-border">
+          <div className="flex items-start justify-between mb-4">
+            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Zap className="w-6 h-6 text-primary" />
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground mb-1">Especialidades</p>
+          <p className="text-2xl font-bold text-foreground">{totalSpecialties}</p>
+        </Card>
+
+        <Card className="p-6 border border-border">
+          <div className="flex items-start justify-between mb-4">
+            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+              <span className="text-lg">⭐</span>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground mb-1">Rating Promedio</p>
+          <p className="text-2xl font-bold text-foreground">{avgRating}</p>
+          <p className="text-xs text-muted-foreground mt-1">de {doctors.length} doctores</p>
+        </Card>
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Line Chart - Appointments */}
-        <Card className="lg:col-span-2 p-6 border border-border">
-          <div className="mb-6">
-            <h2 className="text-lg font-bold text-foreground">Citas Mensuales</h2>
-            <p className="text-sm text-muted-foreground">Comparación citas programadas vs completadas</p>
-          </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={appointmentsData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="mes" stroke="#6b7280" />
-              <YAxis stroke="#6b7280" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#1f2937",
-                  border: "1px solid #374151",
-                  borderRadius: "8px",
-                  color: "#f3f4f6",
-                }}
-              />
-              <Legend />
-              <Line type="monotone" dataKey="citas" stroke="#2a5ba7" strokeWidth={2} />
-              <Line type="monotone" dataKey="completadas" stroke="#10b981" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
-        </Card>
-
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Pie Chart - Specialties */}
         <Card className="p-6 border border-border">
           <div className="mb-6">
-            <h2 className="text-lg font-bold text-foreground">Especialidades</h2>
-            <p className="text-sm text-muted-foreground">Distribución de doctores</p>
+            <h2 className="text-lg font-bold text-foreground">Distribución de Especialidades</h2>
+            <p className="text-sm text-muted-foreground">Doctores por especialidad</p>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={specialtiesData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={100}
-                paddingAngle={2}
-                dataKey="value"
-              >
-                {specialtiesData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          {specialtiesData.length > 0 ? (
+            <>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={specialtiesData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {specialtiesData.map((_entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="mt-4 space-y-2">
+                {specialtiesData.map((item, idx) => (
+                  <div key={item.name} className="flex items-center gap-2 text-sm">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
+                    <span className="text-muted-foreground">{item.name}</span>
+                    <span className="ml-auto font-semibold text-foreground">{item.value}</span>
+                  </div>
                 ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="mt-4 space-y-2">
-            {specialtiesData.map((item, idx) => (
-              <div key={item.name} className="flex items-center gap-2 text-sm">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[idx] }}></div>
-                <span className="text-muted-foreground">{item.name}</span>
-                <span className="ml-auto font-semibold text-foreground">{item.value}</span>
               </div>
-            ))}
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-[300px]">
+              <p className="text-muted-foreground">No hay doctores asignados a especialidades</p>
+            </div>
+          )}
+        </Card>
+
+        {/* Doctors Table */}
+        <Card className="p-6 border border-border">
+          <div className="mb-6">
+            <h2 className="text-lg font-bold text-foreground">Doctores Recientes</h2>
+            <p className="text-sm text-muted-foreground">Últimos doctores registrados</p>
           </div>
+          {doctors.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Doctor</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Especialidad</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {doctors.slice(0, 5).map((doctor) => (
+                    <tr key={doctor.id} className="border-b border-border hover:bg-secondary transition">
+                      <td className="px-4 py-3 text-sm text-foreground font-medium">{doctor.name}</td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">{doctor.specialty.name}</td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                            doctor.status === "Activo"
+                              ? "bg-green-100 text-green-800"
+                              : doctor.status === "Inactivo"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {doctor.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-[300px]">
+              <p className="text-muted-foreground">No hay doctores registrados</p>
+            </div>
+          )}
         </Card>
       </div>
 
-      {/* Recent Appointments */}
+      {/* Recent Users */}
       <Card className="p-6 border border-border">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-lg font-bold text-foreground">Citas Recientes</h2>
-            <p className="text-sm text-muted-foreground">Últimas citas completadas</p>
-          </div>
-          <Button className="bg-primary hover:bg-primary/90">Ver todas</Button>
+        <div className="mb-6">
+          <h2 className="text-lg font-bold text-foreground">Usuarios Recientes</h2>
+          <p className="text-sm text-muted-foreground">Últimos usuarios registrados en la plataforma</p>
         </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Paciente</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Doctor</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Fecha</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Hora</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentAppointments.map((appointment) => (
-                <tr key={appointment.id} className="border-b border-border hover:bg-secondary transition">
-                  <td className="px-4 py-3 text-sm text-foreground font-medium">{appointment.patient}</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">{appointment.doctor}</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">{appointment.date}</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">{appointment.time}</td>
-                  <td className="px-4 py-3">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                      Completada
-                    </span>
-                  </td>
+        {users.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Nombre</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Email</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Rol</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">Estado</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {users.slice(0, 5).map((user) => {
+                  const role = user.admin ? "Admin" : user.doctor ? "Doctor" : "Paciente"
+                  return (
+                    <tr key={user.id} className="border-b border-border hover:bg-secondary transition">
+                      <td className="px-4 py-3 text-sm text-foreground font-medium">{user.name || "Sin nombre"}</td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">{user.email}</td>
+                      <td className="px-4 py-3">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+                          {role}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                            user.status === "Active"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {user.status === "Active" ? "Activo" : "Inactivo"}
+                        </span>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="py-8 text-center">
+            <p className="text-muted-foreground">No hay usuarios registrados</p>
+          </div>
+        )}
       </Card>
     </div>
   )

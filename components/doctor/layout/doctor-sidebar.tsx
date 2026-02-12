@@ -7,11 +7,6 @@ import {
   LayoutDashboard,
   Users,
   Stethoscope,
-  Zap,
-  Calendar,
-  CreditCard,
-  FileText,
-  Settings,
   ChevronDown,
 } from "lucide-react"
 import { useState } from "react"
@@ -20,47 +15,22 @@ import Image from "next/image"
 const menuItems = [
   {
     label: "Dashboard",
-    href: "/admin",
+    href: "/doctor/dashboard",
     icon: LayoutDashboard,
   },
   {
-    label: "Gestión de Doctores",
-    href: "/admin/doctores",
-    icon: Stethoscope,
-  },
-  {
-    label: "Gestión de Especialidades",
-    href: "/admin/especialidades",
-    icon: Zap,
-  },
-  {
-    label: "Usuarios",
-    href: "/admin/usuarios",
+    label: "Mis Pacientes",
+    href: "/doctor/pacientes",
     icon: Users,
   },
   {
-    label: "Citas",
-    href: "/admin/citas",
-    icon: Calendar,
-  },
-  {
-    label: "Pagos",
-    href: "/admin/pagos",
-    icon: CreditCard,
-  },
-  {
-    label: "Reportes",
-    href: "/admin/reportes",
-    icon: FileText,
-  },
-  {
-    label: "Configuración",
-    href: "/admin/configuracion",
-    icon: Settings,
+    label: "Consultas",
+    href: "/doctor/consulta",
+    icon: Stethoscope,
   },
 ]
 
-export function AdminSidebar() {
+export function DoctorSidebar() {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(true)
 
@@ -74,7 +44,7 @@ export function AdminSidebar() {
             <Image src="/logo-rch.png" alt="RCH Logo" width={40} height={40} className="object-contain" />
             <div className="flex flex-col">
               <span className="font-bold text-lg text-foreground leading-tight">RCH</span>
-              <span className="text-[10px] text-muted-foreground leading-tight">Red Cedco Health</span>
+              <span className="text-[10px] text-muted-foreground leading-tight">Portal Médico</span>
             </div>
           </Link>
         )}
@@ -87,8 +57,8 @@ export function AdminSidebar() {
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-2">
         {menuItems.map((item) => {
           const Icon = item.icon
-          const isActive = item.href === "/admin"
-            ? pathname === "/admin"
+          const isActive = item.href === "/doctor/dashboard"
+            ? pathname === "/doctor/dashboard"
             : pathname === item.href || pathname.startsWith(item.href + "/")
 
           return (
